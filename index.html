@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>Boss Respawn Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
@@ -28,7 +29,7 @@
         justify-content: center;
         align-items: flex-start;
         min-height: 100vh;
-        padding: 20px;
+        padding: 20px 15px;
         box-sizing: border-box;
       }
 
@@ -85,8 +86,8 @@
 
       .add-boss-form input[type="text"] {
           flex-grow: 1;
-          padding: 10px;
-          font-size: 1rem;
+          padding: 12px;
+          font-size: 1.1rem;
           background-color: var(--card-background);
           border: 1px solid var(--border-color);
           border-radius: 5px;
@@ -98,11 +99,12 @@
           color: white;
           border: none;
           border-radius: 5px;
-          padding: 10px 15px;
-          font-size: 0.9rem;
+          padding: 12px 18px;
+          font-size: 1rem;
           font-weight: 500;
           cursor: pointer;
           transition: background-color 0.2s ease;
+          flex-shrink: 0;
       }
 
       .add-boss-button:hover {
@@ -144,8 +146,8 @@
           color: white;
           border: none;
           border-radius: 5px;
-          padding: 8px 12px;
-          font-size: 0.8rem;
+          padding: 10px 14px;
+          font-size: 0.9rem;
           font-weight: 500;
           cursor: pointer;
           transition: background-color 0.2s ease;
@@ -181,20 +183,22 @@
         display: flex;
         flex-direction: column;
         gap: 5px;
+        flex-grow: 1;
+        min-width: 0;
       }
 
       .channel-name {
-        font-size: 1.2rem;
+        font-size: 1.3rem;
         font-weight: 500;
       }
 
       .kill-time {
-        font-size: 0.9rem;
+        font-size: 1rem;
         color: #b0b0b0;
       }
 
       .elapsed-time {
-        font-size: 0.9rem;
+        font-size: 1rem;
         color: var(--elapsed-time-color);
         font-style: italic;
       }
@@ -204,11 +208,12 @@
         color: white;
         border: none;
         border-radius: 5px;
-        padding: 10px 15px;
-        font-size: 0.9rem;
+        padding: 12px 18px;
+        font-size: 1rem;
         font-weight: 500;
         cursor: pointer;
         transition: background-color 0.2s ease;
+        flex-shrink: 0;
       }
 
       .kill-button:hover {
@@ -274,10 +279,33 @@
       let bosses = [];
       let currentLanguage = 'vi';
 
+      const sortChannels = (a, b) => {
+        // Channels with no data (null timestamp) go to the bottom.
+        if (a.killTimestamp !== null && b.killTimestamp === null) return -1;
+        if (b.killTimestamp !== null && a.killTimestamp === null) return 1;
+
+        // If both are null, their relative order doesn't matter.
+        if (a.killTimestamp === null && b.killTimestamp === null) return 0;
+
+        // For channels that have been killed, sort by the oldest kill time first (ascending order).
+        return a.killTimestamp - b.killTimestamp;
+      };
+
       function loadState() {
         try {
           const savedBosses = localStorage.getItem(STORAGE_KEY);
-          bosses = savedBosses ? JSON.parse(savedBosses) : [];
+          if (savedBosses) {
+            bosses = JSON.parse(savedBosses);
+            // Ensure channels are always sorted on load for data consistency.
+            bosses.forEach(boss => {
+              if (boss.channels && Array.isArray(boss.channels)) {
+                boss.channels.sort(sortChannels);
+              }
+            });
+          } else {
+            bosses = [];
+          }
+
           const savedLang = localStorage.getItem(LANG_STORAGE_KEY);
           currentLanguage = savedLang && translations[savedLang] ? savedLang : 'vi';
         } catch (error) {
@@ -455,11 +483,7 @@
                       const updatedChannels = boss.channels.map(channel =>
                           channel.id === channelId ? { ...channel, killTimestamp: now } : channel
                       );
-                      const sortedChannels = [...updatedChannels].sort((a, b) => {
-                          if (a.killTimestamp === null) return 1;
-                          if (b.killTimestamp === null) return -1;
-                          return b.killTimestamp - a.killTimestamp;
-                      });
+                      const sortedChannels = [...updatedChannels].sort(sortChannels);
                       return { ...boss, channels: sortedChannels };
                   }
                   return boss;

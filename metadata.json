@@ -1,0 +1,5 @@
+{
+  "name": "Boss Respawn Tracker",
+  "description": "A tool to track boss kill times across multiple channels and sort them by respawn priority.",
+  "requestFramePermissions": []
+}

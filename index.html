@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Boss Respawn Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --background-color: #1a1a1a;
+        --card-background: #2c2c2c;
+        --text-color: #e0e0e0;
+        --primary-color: #4CAF50;
+        --primary-hover: #45a049;
+        --danger-color: #e53935;
+        --danger-hover: #c62828;
+        --border-color: #444;
+        --elapsed-time-color: #87CEEB; /* Sky blue for elapsed time */
+        --font-family: 'Roboto', sans-serif;
+      }
+
+      body {
+        margin: 0;
+        font-family: var(--font-family);
+        background-color: var(--background-color);
+        color: var(--text-color);
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        padding: 20px;
+        box-sizing: border-box;
+      }
+
+      #root {
+        width: 100%;
+        max-width: 600px;
+      }
+
+      .app-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      .header-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .lang-switcher button {
+        background: none;
+        border: 1px solid var(--border-color);
+        color: var(--text-color);
+        padding: 5px 10px;
+        margin-left: 5px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: background-color 0.2s, color 0.2s;
+      }
+      .lang-switcher button.active {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+      }
+      .lang-switcher button:hover:not(.active) {
+        background-color: var(--card-background);
+      }
+
+      h1 {
+        text-align: center;
+        color: var(--text-color);
+        font-weight: 700;
+        margin: 0;
+      }
+
+      /* Add Boss Form */
+      .add-boss-form {
+          display: flex;
+          gap: 10px;
+          margin-bottom: 10px; /* Adjusted margin */
+      }
+
+      .add-boss-form input[type="text"] {
+          flex-grow: 1;
+          padding: 10px;
+          font-size: 1rem;
+          background-color: var(--card-background);
+          border: 1px solid var(--border-color);
+          border-radius: 5px;
+          color: var(--text-color);
+      }
+
+      .add-boss-button {
+          background-color: var(--primary-color);
+          color: white;
+          border: none;
+          border-radius: 5px;
+          padding: 10px 15px;
+          font-size: 0.9rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+      }
+
+      .add-boss-button:hover {
+          background-color: var(--primary-hover);
+      }
+
+      /* Boss List & Cards */
+      .boss-list {
+          display: flex;
+          flex-direction: column;
+          gap: 30px;
+      }
+
+      .boss-tracker-card {
+          background-color: #242424; /* Slightly different background for distinction */
+          border-radius: 8px;
+          padding: 20px;
+          border: 1px solid var(--border-color);
+          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      }
+
+      .boss-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+          border-bottom: 1px solid var(--border-color);
+          padding-bottom: 10px;
+      }
+
+      .boss-header h2 {
+          margin: 0;
+          font-size: 1.5rem;
+          color: var(--primary-color);
+      }
+
+      .delete-boss-button {
+          background-color: var(--danger-color);
+          color: white;
+          border: none;
+          border-radius: 5px;
+          padding: 8px 12px;
+          font-size: 0.8rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+      }
+
+      .delete-boss-button:hover {
+          background-color: var(--danger-hover);
+      }
+
+      .channel-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .channel-card {
+        background-color: var(--card-background);
+        border-radius: 8px;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid var(--border-color);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .channel-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+      }
+
+      .channel-info {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .channel-name {
+        font-size: 1.2rem;
+        font-weight: 500;
+      }
+
+      .kill-time {
+        font-size: 0.9rem;
+        color: #b0b0b0;
+      }
+
+      .elapsed-time {
+        font-size: 0.9rem;
+        color: var(--elapsed-time-color);
+        font-style: italic;
+      }
+
+      .kill-button {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 15px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+
+      .kill-button:hover {
+        background-color: var(--primary-hover);
+      }
+
+      .kill-button:active {
+          transform: scale(0.98);
+      }
+    </style>
+  <link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script>
+      // --- DATA STRUCTURES ---
+      const STORAGE_KEY = 'bossTrackerData';
+      const LANG_STORAGE_KEY = 'bossTrackerLang';
+
+      // --- LOCALIZATION ---
+      const translations = {
+        en: {
+          title: "Boss Respawn Tracker",
+          addBossPlaceholder: "Enter new boss name...",
+          addBossButton: "Add Boss",
+          deleteButton: "Delete",
+          channelNamePrefix: "Channel",
+          killedAt: "Killed at:",
+          elapsedTimePrefix: "Elapsed:",
+          notYetRecorded: "Not yet recorded",
+          killButton: "Kill Boss",
+          enterBossNamePrompt: "Please enter a boss name.",
+          hour: "hour",
+          hours: "hours",
+          minute: "minute",
+          minutes: "minutes",
+          second: "second",
+          seconds: "seconds",
+          ago: "ago"
+        },
+        vi: {
+          title: "Theo Dõi Boss",
+          addBossPlaceholder: "Nhập tên boss mới...",
+          addBossButton: "Thêm Boss",
+          deleteButton: "Xóa",
+          channelNamePrefix: "Kênh",
+          killedAt: "Bị hạ lúc:",
+          elapsedTimePrefix: "Đã hạ:",
+          notYetRecorded: "Chưa ghi nhận",
+          killButton: "Hạ Boss",
+          enterBossNamePrompt: "Vui lòng nhập tên boss.",
+          hour: "giờ",
+          hours: "giờ",
+          minute: "phút",
+          minutes: "phút",
+          second: "giây",
+          seconds: "giây",
+          ago: "trước"
+        }
+      };
+
+      // --- STATE MANAGEMENT ---
+      let bosses = [];
+      let currentLanguage = 'vi';
+
+      function loadState() {
+        try {
+          const savedBosses = localStorage.getItem(STORAGE_KEY);
+          bosses = savedBosses ? JSON.parse(savedBosses) : [];
+          const savedLang = localStorage.getItem(LANG_STORAGE_KEY);
+          currentLanguage = savedLang && translations[savedLang] ? savedLang : 'vi';
+        } catch (error) {
+          console.error("Failed to load data from local storage", error);
+          bosses = [];
+          currentLanguage = 'vi';
+        }
+      }
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(bosses));
+        } catch (error) {
+          console.error("Failed to save boss data to local storage", error);
+        }
+      }
+      
+      function saveLangState() {
+        try {
+          localStorage.setItem(LANG_STORAGE_KEY, currentLanguage);
+        } catch (error) {
+          console.error("Failed to save language to local storage", error);
+        }
+      }
+
+      // --- UTILITY FUNCTIONS ---
+      const formatTimestamp = (timestamp) => {
+        const T = translations[currentLanguage];
+        if (timestamp === null) return T.notYetRecorded;
+        const locale = currentLanguage === 'vi' ? 'vi-VN' : 'en-US';
+        return new Date(timestamp).toLocaleTimeString(locale);
+      };
+
+      const formatElapsedTime = (timestamp) => {
+        const T = translations[currentLanguage];
+        if (timestamp === null) return '';
+        const totalSeconds = Math.floor((Date.now() - timestamp) / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        let parts = [];
+        if (hours > 0) parts.push(`${hours} ${hours > 1 ? T.hours : T.hour}`);
+        if (minutes > 0) parts.push(`${minutes} ${minutes > 1 ? T.minutes : T.minute}`);
+        parts.push(`${seconds} ${seconds > 1 ? T.seconds : T.second}`);
+        
+        return `${parts.join(' ')} ${T.ago}`;
+      };
+
+      // --- UI UPDATE FUNCTIONS ---
+      function applyTranslations() {
+        const T = translations[currentLanguage];
+        document.title = T.title;
+        document.getElementById('app-title').textContent = T.title;
+        const addBossInput = document.getElementById('add-boss-input');
+        addBossInput.placeholder = T.addBossPlaceholder;
+        addBossInput.setAttribute('aria-label', T.addBossPlaceholder);
+        document.getElementById('add-boss-button').textContent = T.addBossButton;
+
+        // Update active language button
+        document.querySelectorAll('.lang-switcher button').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.lang === currentLanguage);
+        });
+      }
+
+      function render() {
+        applyTranslations();
+        const bossListContainer = document.querySelector('.boss-list');
+        if (!bossListContainer) return;
+
+        bossListContainer.innerHTML = ''; // Clear existing content
+        const T = translations[currentLanguage];
+
+        bosses.forEach(boss => {
+          const bossCard = document.createElement('div');
+          bossCard.className = 'boss-tracker-card';
+          bossCard.dataset.bossId = boss.id;
+
+          const channelsHTML = boss.channels.map(channel => `
+            <div class="channel-card" data-channel-id="${channel.id}">
+              <div class="channel-info">
+                <span class="channel-name">${T.channelNamePrefix} ${channel.id}</span>
+                <span class="kill-time">${T.killedAt} ${formatTimestamp(channel.killTimestamp)}</span>
+                ${channel.killTimestamp ? `<span class="elapsed-time" data-timestamp="${channel.killTimestamp}">${T.elapsedTimePrefix} ${formatElapsedTime(channel.killTimestamp)}</span>` : ''}
+              </div>
+              <button
+                  class="kill-button"
+                  data-boss-id="${boss.id}"
+                  data-channel-id="${channel.id}"
+                  aria-label="${T.killButton} ${boss.name} at ${T.channelNamePrefix} ${channel.id}"
+              >
+                ${T.killButton}
+              </button>
+            </div>
+          `).join('');
+
+          bossCard.innerHTML = `
+            <div class="boss-header">
+                <h2>${boss.name}</h2>
+                <button 
+                    class="delete-boss-button" 
+                    data-boss-id="${boss.id}"
+                    aria-label="${T.deleteButton} ${boss.name}"
+                >
+                    ${T.deleteButton}
+                </button>
+            </div>
+            <div class="channel-list" aria-live="polite">
+                ${channelsHTML}
+            </div>
+          `;
+
+          bossListContainer.appendChild(bossCard);
+        });
+      }
+
+      function updateElapsedTimes() {
+        const T = translations[currentLanguage];
+        document.querySelectorAll('.elapsed-time[data-timestamp]').forEach(el => {
+          const timestamp = parseInt(el.dataset.timestamp, 10);
+          if (timestamp) {
+            el.textContent = `${T.elapsedTimePrefix} ${formatElapsedTime(timestamp)}`;
+          }
+        });
+      }
+
+      // --- EVENT HANDLERS ---
+      function handleAddBoss() {
+        const newBossNameInput = document.getElementById('add-boss-input');
+        const newBossName = newBossNameInput.value.trim();
+        const T = translations[currentLanguage];
+
+        if (newBossName === '') {
+          alert(T.enterBossNamePrompt);
+          return;
+        }
+
+        const createInitialChannels = () => 
+          Array.from({ length: 8 }, (_, i) => ({
+            id: i + 1,
+            name: `${T.channelNamePrefix} ${i + 1}`,
+            killTimestamp: null,
+          }));
+
+        const newBoss = {
+          id: Date.now(),
+          name: newBossName,
+          channels: createInitialChannels(),
+        };
+
+        bosses.push(newBoss);
+        newBossNameInput.value = '';
+        saveState();
+        render();
+      }
+
+      function handleContainerClick(event) {
+          const target = event.target;
+          if (!target || typeof target.matches !== 'function') return;
+
+          if (target.matches('.delete-boss-button')) {
+              const bossId = parseInt(target.dataset.bossId, 10);
+              bosses = bosses.filter(b => b.id !== bossId);
+              saveState();
+              render();
+          }
+
+          if (target.matches('.kill-button')) {
+              const bossId = parseInt(target.dataset.bossId, 10);
+              const channelId = parseInt(target.dataset.channelId, 10);
+              const now = Date.now();
+
+              bosses = bosses.map(boss => {
+                  if (boss.id === bossId) {
+                      const updatedChannels = boss.channels.map(channel =>
+                          channel.id === channelId ? { ...channel, killTimestamp: now } : channel
+                      );
+                      const sortedChannels = [...updatedChannels].sort((a, b) => {
+                          if (a.killTimestamp === null) return 1;
+                          if (b.killTimestamp === null) return -1;
+                          return b.killTimestamp - a.killTimestamp;
+                      });
+                      return { ...boss, channels: sortedChannels };
+                  }
+                  return boss;
+              });
+              
+              saveState();
+              render();
+          }
+      }
+
+      function handleLangChange(event) {
+        const newLang = event.target.dataset.lang;
+        if (newLang && newLang !== currentLanguage) {
+            currentLanguage = newLang;
+            saveLangState();
+            render();
+        }
+      }
+
+      // --- INITIALIZATION ---
+      function initializeApp() {
+          const rootElement = document.getElementById('root');
+          if (!rootElement) {
+              console.error("Root element not found!");
+              return;
+          }
+
+          rootElement.innerHTML = `
+              <div class="app-container">
+                <div class="header-controls">
+                    <h1 id="app-title"></h1>
+                    <div class="lang-switcher">
+                        <button data-lang="vi">VI</button>
+                        <button data-lang="en">EN</button>
+                    </div>
+                </div>
+                <div class="add-boss-form">
+                    <input 
+                      type="text"
+                      id="add-boss-input"
+                    />
+                    <button class="add-boss-button" id="add-boss-button"></button>
+                </div>
+                <div class="boss-list"></div>
+              </div>
+          `;
+
+          loadState();
+          render();
+
+          document.querySelector('.add-boss-button').addEventListener('click', handleAddBoss);
+          document.querySelector('.boss-list').addEventListener('click', handleContainerClick);
+          document.querySelector('.lang-switcher').addEventListener('click', handleLangChange);
+          
+          setInterval(updateElapsedTimes, 10000);
+      }
+
+      document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>

@@ -1,548 +1,306 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Boss Respawn Tracker</title>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Các công cụ và dự án của Paig</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-      :root {
-        --background-color: #1a1a1a;
-        --card-background: #2c2c2c;
-        --text-color: #e0e0e0;
-        --primary-color: #4CAF50;
-        --primary-hover: #45a049;
-        --danger-color: #e53935;
-        --danger-hover: #c62828;
-        --border-color: #444;
-        --elapsed-time-color: #87CEEB; /* Sky blue for elapsed time */
-        --font-family: 'Roboto', sans-serif;
-      }
-
-      body {
-        margin: 0;
-        font-family: var(--font-family);
-        background-color: var(--background-color);
-        color: var(--text-color);
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        min-height: 100vh;
-        padding: 20px 15px;
-        box-sizing: border-box;
-      }
-
-      #root {
-        width: 100%;
-        max-width: 600px;
-      }
-
-      .app-container {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-      }
-      
-      .header-controls {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      .lang-switcher button {
-        background: none;
-        border: 1px solid var(--border-color);
-        color: var(--text-color);
-        padding: 5px 10px;
-        margin-left: 5px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-weight: 500;
-        transition: background-color 0.2s, color 0.2s;
-      }
-      .lang-switcher button.active {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-        color: white;
-      }
-      .lang-switcher button:hover:not(.active) {
-        background-color: var(--card-background);
-      }
-
-      h1 {
-        text-align: center;
-        color: var(--text-color);
-        font-weight: 700;
-        margin: 0;
-      }
-
-      /* Add Boss Form */
-      .add-boss-form {
-          display: flex;
-          gap: 10px;
-          margin-bottom: 10px; /* Adjusted margin */
-      }
-
-      .add-boss-form input[type="text"] {
-          flex-grow: 1;
-          padding: 12px;
-          font-size: 1.1rem;
-          background-color: var(--card-background);
-          border: 1px solid var(--border-color);
-          border-radius: 5px;
-          color: var(--text-color);
-      }
-
-      .add-boss-button {
-          background-color: var(--primary-color);
-          color: white;
-          border: none;
-          border-radius: 5px;
-          padding: 12px 18px;
-          font-size: 1rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: background-color 0.2s ease;
-          flex-shrink: 0;
-      }
-
-      .add-boss-button:hover {
-          background-color: var(--primary-hover);
-      }
-
-      /* Boss List & Cards */
-      .boss-list {
-          display: flex;
-          flex-direction: column;
-          gap: 30px;
-      }
-
-      .boss-tracker-card {
-          background-color: #242424; /* Slightly different background for distinction */
-          border-radius: 8px;
-          padding: 20px;
-          border: 1px solid var(--border-color);
-          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-      }
-
-      .boss-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 20px;
-          border-bottom: 1px solid var(--border-color);
-          padding-bottom: 10px;
-      }
-
-      .boss-header h2 {
-          margin: 0;
-          font-size: 1.5rem;
-          color: var(--primary-color);
-      }
-
-      .delete-boss-button {
-          background-color: var(--danger-color);
-          color: white;
-          border: none;
-          border-radius: 5px;
-          padding: 10px 14px;
-          font-size: 0.9rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: background-color 0.2s ease;
-      }
-
-      .delete-boss-button:hover {
-          background-color: var(--danger-hover);
-      }
-
-      .channel-list {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-      }
-
-      .channel-card {
-        background-color: var(--card-background);
-        border-radius: 8px;
-        padding: 15px 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border: 1px solid var(--border-color);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      }
-
-      .channel-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-      }
-
-      .channel-info {
-        display: flex;
-        flex-direction: column;
-        gap: 5px;
-        flex-grow: 1;
-        min-width: 0;
-      }
-
-      .channel-name {
-        font-size: 1.3rem;
-        font-weight: 500;
-      }
-
-      .kill-time {
-        font-size: 1rem;
-        color: #b0b0b0;
-      }
-
-      .elapsed-time {
-        font-size: 1rem;
-        color: var(--elapsed-time-color);
-        font-style: italic;
-      }
-
-      .kill-button {
-        background-color: var(--primary-color);
-        color: white;
-        border: none;
-        border-radius: 5px;
-        padding: 12px 18px;
-        font-size: 1rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
-        flex-shrink: 0;
-      }
-
-      .kill-button:hover {
-        background-color: var(--primary-hover);
-      }
-
-      .kill-button:active {
-          transform: scale(0.98);
-      }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Styles for modal transition */
+        .modal {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .modal.is-open {
+            display: flex;
+            opacity: 1;
+        }
     </style>
-  <link rel="stylesheet" href="/index.css">
+<link rel="stylesheet" href="/index.css">
 </head>
-  <body>
-    <div id="root"></div>
-    <script>
-      // --- DATA STRUCTURES ---
-      const STORAGE_KEY = 'bossTrackerData';
-      const LANG_STORAGE_KEY = 'bossTrackerLang';
+<body class="bg-gray-50 text-gray-800">
 
-      // --- LOCALIZATION ---
-      const translations = {
-        en: {
-          title: "Boss Respawn Tracker",
-          addBossPlaceholder: "Enter new boss name...",
-          addBossButton: "Add Boss",
-          deleteButton: "Delete",
-          channelNamePrefix: "Channel",
-          killedAt: "Killed at:",
-          elapsedTimePrefix: "Elapsed:",
-          notYetRecorded: "Not yet recorded",
-          killButton: "Kill Boss",
-          enterBossNamePrompt: "Please enter a boss name.",
-          hour: "hour",
-          hours: "hours",
-          minute: "minute",
-          minutes: "minutes",
-          second: "second",
-          seconds: "seconds",
-          ago: "ago"
-        },
-        vi: {
-          title: "Theo Dõi Boss",
-          addBossPlaceholder: "Nhập tên boss mới...",
-          addBossButton: "Thêm Boss",
-          deleteButton: "Xóa",
-          channelNamePrefix: "Kênh",
-          killedAt: "Bị hạ lúc:",
-          elapsedTimePrefix: "Đã hạ:",
-          notYetRecorded: "Chưa ghi nhận",
-          killButton: "Hạ Boss",
-          enterBossNamePrompt: "Vui lòng nhập tên boss.",
-          hour: "giờ",
-          hours: "giờ",
-          minute: "phút",
-          minutes: "phút",
-          second: "giây",
-          seconds: "giây",
-          ago: "trước"
-        }
-      };
+    <div id="app-container" class="min-h-screen flex flex-col">
+      <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <!-- Header will be injected here -->
+        <header id="app-header" class="text-center max-w-2xl mx-auto"></header>
 
-      // --- STATE MANAGEMENT ---
-      let bosses = [];
-      let currentLanguage = 'vi';
+        <div class="my-12 border-b border-gray-200"></div>
 
-      const sortChannels = (a, b) => {
-        // Channels with no data (null timestamp) go to the bottom.
-        if (a.killTimestamp !== null && b.killTimestamp === null) return -1;
-        if (b.killTimestamp !== null && a.killTimestamp === null) return 1;
-
-        // If both are null, their relative order doesn't matter.
-        if (a.killTimestamp === null && b.killTimestamp === null) return 0;
-
-        // For channels that have been killed, sort by the oldest kill time first (ascending order).
-        return a.killTimestamp - b.killTimestamp;
-      };
-
-      function loadState() {
-        try {
-          const savedBosses = localStorage.getItem(STORAGE_KEY);
-          if (savedBosses) {
-            bosses = JSON.parse(savedBosses);
-            // Ensure channels are always sorted on load for data consistency.
-            bosses.forEach(boss => {
-              if (boss.channels && Array.isArray(boss.channels)) {
-                boss.channels.sort(sortChannels);
-              }
-            });
-          } else {
-            bosses = [];
-          }
-
-          const savedLang = localStorage.getItem(LANG_STORAGE_KEY);
-          currentLanguage = savedLang && translations[savedLang] ? savedLang : 'vi';
-        } catch (error) {
-          console.error("Failed to load data from local storage", error);
-          bosses = [];
-          currentLanguage = 'vi';
-        }
-      }
-
-      function saveState() {
-        try {
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(bosses));
-        } catch (error) {
-          console.error("Failed to save boss data to local storage", error);
-        }
-      }
-      
-      function saveLangState() {
-        try {
-          localStorage.setItem(LANG_STORAGE_KEY, currentLanguage);
-        } catch (error) {
-          console.error("Failed to save language to local storage", error);
-        }
-      }
-
-      // --- UTILITY FUNCTIONS ---
-      const formatTimestamp = (timestamp) => {
-        const T = translations[currentLanguage];
-        if (timestamp === null) return T.notYetRecorded;
-        const locale = currentLanguage === 'vi' ? 'vi-VN' : 'en-US';
-        return new Date(timestamp).toLocaleTimeString(locale);
-      };
-
-      const formatElapsedTime = (timestamp) => {
-        const T = translations[currentLanguage];
-        if (timestamp === null) return '';
-        const totalSeconds = Math.floor((Date.now() - timestamp) / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
-        const seconds = totalSeconds % 60;
-
-        let parts = [];
-        if (hours > 0) parts.push(`${hours} ${hours > 1 ? T.hours : T.hour}`);
-        if (minutes > 0) parts.push(`${minutes} ${minutes > 1 ? T.minutes : T.minute}`);
-        parts.push(`${seconds} ${seconds > 1 ? T.seconds : T.second}`);
-        
-        return `${parts.join(' ')} ${T.ago}`;
-      };
-
-      // --- UI UPDATE FUNCTIONS ---
-      function applyTranslations() {
-        const T = translations[currentLanguage];
-        document.title = T.title;
-        document.getElementById('app-title').textContent = T.title;
-        const addBossInput = document.getElementById('add-boss-input');
-        addBossInput.placeholder = T.addBossPlaceholder;
-        addBossInput.setAttribute('aria-label', T.addBossPlaceholder);
-        document.getElementById('add-boss-button').textContent = T.addBossButton;
-
-        // Update active language button
-        document.querySelectorAll('.lang-switcher button').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.lang === currentLanguage);
-        });
-      }
-
-      function render() {
-        applyTranslations();
-        const bossListContainer = document.querySelector('.boss-list');
-        if (!bossListContainer) return;
-
-        bossListContainer.innerHTML = ''; // Clear existing content
-        const T = translations[currentLanguage];
-
-        bosses.forEach(boss => {
-          const bossCard = document.createElement('div');
-          bossCard.className = 'boss-tracker-card';
-          bossCard.dataset.bossId = boss.id;
-
-          const channelsHTML = boss.channels.map(channel => `
-            <div class="channel-card" data-channel-id="${channel.id}">
-              <div class="channel-info">
-                <span class="channel-name">${T.channelNamePrefix} ${channel.id}</span>
-                <span class="kill-time">${T.killedAt} ${formatTimestamp(channel.killTimestamp)}</span>
-                ${channel.killTimestamp ? `<span class="elapsed-time" data-timestamp="${channel.killTimestamp}">${T.elapsedTimePrefix} ${formatElapsedTime(channel.killTimestamp)}</span>` : ''}
-              </div>
-              <button
-                  class="kill-button"
-                  data-boss-id="${boss.id}"
-                  data-channel-id="${channel.id}"
-                  aria-label="${T.killButton} ${boss.name} at ${T.channelNamePrefix} ${channel.id}"
-              >
-                ${T.killButton}
-              </button>
+        <!-- Controls -->
+        <div class="mb-8 flex flex-col sm:flex-row gap-4">
+          <div class="relative flex-grow">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-gray-400">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+              </svg>
             </div>
-          `).join('');
-
-          bossCard.innerHTML = `
-            <div class="boss-header">
-                <h2>${boss.name}</h2>
-                <button 
-                    class="delete-boss-button" 
-                    data-boss-id="${boss.id}"
-                    aria-label="${T.deleteButton} ${boss.name}"
-                >
-                    ${T.deleteButton}
-                </button>
+            <input
+              id="search-input"
+              type="text"
+              placeholder="Tìm theo tên hoặc mô tả..."
+              class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 transition"
+            />
+          </div>
+          <div class="relative">
+             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-gray-400">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.572a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z"></path>
+                </svg>
             </div>
-            <div class="channel-list" aria-live="polite">
-                ${channelsHTML}
-            </div>
-          `;
+            <select
+              id="filter-select"
+              class="w-full sm:w-auto pl-10 pr-8 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 appearance-none transition bg-white"
+            >
+            </select>
+          </div>
+        </div>
 
-          bossListContainer.appendChild(bossCard);
-        });
-      }
+        <!-- Software Grid -->
+        <div id="software-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+        <div id="no-results" class="text-center py-16 hidden">
+            <p class="text-gray-500 text-lg">Không tìm thấy dự án nào khớp với tiêu chí của bạn.</p>
+        </div>
+      </main>
 
-      function updateElapsedTimes() {
-        const T = translations[currentLanguage];
-        document.querySelectorAll('.elapsed-time[data-timestamp]').forEach(el => {
-          const timestamp = parseInt(el.dataset.timestamp, 10);
-          if (timestamp) {
-            el.textContent = `${T.elapsedTimePrefix} ${formatElapsedTime(timestamp)}`;
-          }
-        });
-      }
+      <!-- Footer will be injected here -->
+      <footer id="app-footer" class="bg-white border-t border-gray-200"></footer>
+    </div>
+    
+    <!-- Modal -->
+    <div id="modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
+      <div id="modal-content" class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        <div class="sticky top-0 bg-white border-b border-gray-200 p-4 flex justify-between items-center">
+          <h2 id="modal-title" class="text-2xl font-bold text-gray-900"></h2>
+          <button id="modal-close-btn" class="text-gray-500 hover:text-gray-800">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div id="modal-body" class="p-6"></div>
+      </div>
+    </div>
 
-      // --- EVENT HANDLERS ---
-      function handleAddBoss() {
-        const newBossNameInput = document.getElementById('add-boss-input');
-        const newBossName = newBossNameInput.value.trim();
-        const T = translations[currentLanguage];
 
-        if (newBossName === '') {
-          alert(T.enterBossNamePrompt);
-          return;
-        }
+    <script type="module">
+        // --- DỮ LIỆU CỐ ĐỊNH ---
+        const AUTHOR_NAME = "Paig";
+        const AUTHOR_BIO = "Tôi là Paig — thích tạo ra những công cụ nhỏ giúp tự động hóa và sáng tạo nội dung. Dưới đây là vài dự án cá nhân, hy vọng bạn thấy thú vị.";
+        const CATEGORIES = ['Tất cả', 'Desktop', 'Web', 'Công cụ', 'Di động'];
+        const SOFTWARE_DATA = [
+          { id: 1, name: "CodeSnap", category: "Desktop", thumbnailUrl: "https://picsum.photos/seed/codesnap/600/400", shortDescription: "Một công cụ nhanh và đẹp để tạo ảnh chụp màn hình mã nguồn của bạn.", longDescription: "CodeSnap là một ứng dụng desktop xây dựng bằng Electron cho phép lập trình viên tạo ra những hình ảnh tuyệt đẹp, sẵn sàng cho thuyết trình từ các đoạn mã nguồn. Hỗ trợ nhiều giao diện, tô màu cú pháp cho nhiều ngôn ngữ, và các tùy chọn tùy chỉnh như padding và màu nền.", images: ["https://picsum.photos/seed/codesnap-detail1/800/600", "https://picsum.photos/seed/codesnap-detail2/800/600"], links: [{ type: 'download', url: '#' }, { type: 'github', url: '#' }, { type: 'donate', url: '#' }] },
+          { id: 2, name: "TaskFlow", category: "Web", thumbnailUrl: "https://picsum.photos/seed/taskflow/600/400", shortDescription: "Một bảng Kanban tối giản để quản lý các dự án cá nhân của bạn.", longDescription: "TaskFlow là một công cụ quản lý dự án dựa trên web lấy cảm hứng từ sự đơn giản của Kanban. Kéo và thả các tác vụ giữa các cột, thêm chi tiết và ngày hết hạn, và trực quan hóa quy trình công việc của bạn. Được xây dựng bằng các công nghệ web hiện đại cho trải nghiệm nhanh và nhạy.", images: ["https://picsum.photos/seed/taskflow-detail1/800/600"], videos: ["https://www.w3schools.com/html/mov_bbb.mp4"], links: [{ type: 'github', url: '#' }, { type: 'donate', url: '#' }] },
+          { id: 3, name: "QuickMark", category: "Công cụ", thumbnailUrl: "https://picsum.photos/seed/quickmark/600/400", shortDescription: "Một trình soạn thảo markdown nhẹ với xem trước trực tiếp và tô màu cú pháp.", longDescription: "QuickMark là một trình soạn thảo markdown đa nền tảng được thiết kế cho tốc độ và sự đơn giản. Nó có giao diện sạch sẽ, không gây xao lãng với bảng xem trước trực tiếp cập nhật khi bạn gõ. Đây là công cụ hoàn hảo để viết ghi chú, tài liệu hoặc bài đăng trên blog.", images: ["https://picsum.photos/seed/quickmark-detail1/800/600", "https://picsum.photos/seed/quickmark-detail2/800/600"], links: [{ type: 'download', url: '#' }, { type: 'github', url: '#' }] },
+          { id: 4, name: "PhotoSphere", category: "Di động", thumbnailUrl: "https://picsum.photos/seed/photosphere/600/400", shortDescription: "Một ứng dụng di động để sắp xếp và chia sẻ ảnh với tính năng gắn thẻ thông minh.", longDescription: "PhotoSphere cho iOS và Android giúp bạn quản lý thư viện ảnh ngày càng lớn của mình. Nó sử dụng học máy trên thiết bị để tự động gắn thẻ ảnh của bạn, giúp chúng dễ dàng tìm kiếm. Tạo album, chia sẻ với bạn bè và tận hưởng những kỷ niệm của bạn.", images: ["https://picsum.photos/seed/photosphere-detail1/400/800", "https://picsum.photos/seed/photosphere-detail2/400/800"], links: [{ type: 'download', url: '#' }] },
+          { id: 5, name: "Screenshot", category: "Desktop", thumbnailUrl: "https://scontent.fhph5-1.fna.fbcdn.net/v/t39.30808-6/574490181_122199344504311572_2791694066453953783_n.png?_nc_cat=109&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=BAPRpphF2a4Q7kNvwH28myC&_nc_oc=AdkoqGNg0jqZ7swNW22GycMUkgCgn0zc3wgJyQdsgJM6IVdSo2mh962Zr72-7RPQ5CDqGCYWyiltbmWecAgCkEWJ&_nc_zt=23&_nc_ht=scontent.fhph5-1.fna&_nc_gid=ZMAsbhOPbFU4hDUB3xtlEg&oh=00_AfjsRc126INS-RXiGm06ByMvVzYSGBVngmI1ZJa9vzvt-A&oe=69127194", shortDescription: "Một ứng dụng di động để sắp xếp và chia sẻ ảnh với tính năng gắn thẻ thông minh.", longDescription: "PhotoSphere cho iOS và Android giúp bạn quản lý thư viện ảnh ngày càng lớn của mình. Nó sử dụng học máy trên thiết bị để tự động gắn thẻ ảnh của bạn, giúp chúng dễ dàng tìm kiếm. Tạo album, chia sẻ với bạn bè và tận hưởng những kỷ niệm của bạn.", images: ["https://picsum.photos/seed/photosphere-detail1/400/800", "https://scontent.fhph5-1.fna.fbcdn.net/v/t39.30808-6/574490181_122199344504311572_2791694066453953783_n.png?_nc_cat=109&ccb=1-7&_nc_sid=cc71e4&_nc_ohc=BAPRpphF2a4Q7kNvwH28myC&_nc_oc=AdkoqGNg0jqZ7swNW22GycMUkgCgn0zc3wgJyQdsgJM6IVdSo2mh962Zr72-7RPQ5CDqGCYWyiltbmWecAgCkEWJ&_nc_zt=23&_nc_ht=scontent.fhph5-1.fna&_nc_gid=ZMAsbhOPbFU4hDUB3xtlEg&oh=00_AfjsRc126INS-RXiGm06ByMvVzYSGBVngmI1ZJa9vzvt-A&oe=69127194"], links: [{ type: 'download', url: '#' }] }
+       
+        ];
+        const FOOTER_LINKS = [ { name: "Email", url: "mailto:your.email@example.com" }, { name: "GitHub", url: "#" }, { name: "LinkedIn", url: "#" } ];
 
-        const createInitialChannels = () => 
-          Array.from({ length: 8 }, (_, i) => ({
-            id: i + 1,
-            name: `${T.channelNamePrefix} ${i + 1}`,
-            killTimestamp: null,
-          }));
-
-        const newBoss = {
-          id: Date.now(),
-          name: newBossName,
-          channels: createInitialChannels(),
+        // --- ICON SVGs ---
+        const ICONS = {
+            download: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"></path></svg>`,
+            github: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="h-4 w-4 mr-2"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>`,
+            donate: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"></path></svg>`,
+            details: `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-4.5 0V6.375c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 10.5z"></path></svg>`
         };
 
-        bosses.push(newBoss);
-        newBossNameInput.value = '';
-        saveState();
-        render();
-      }
+        // --- THAM CHIẾU ĐẾN CÁC PHẦN TỬ DOM ---
+        const headerEl = document.getElementById('app-header');
+        const footerEl = document.getElementById('app-footer');
+        const searchInput = document.getElementById('search-input');
+        const filterSelect = document.getElementById('filter-select');
+        const softwareGrid = document.getElementById('software-grid');
+        const noResults = document.getElementById('no-results');
+        const modal = document.getElementById('modal');
+        const modalContent = document.getElementById('modal-content');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
 
-      function handleContainerClick(event) {
-          const target = event.target;
-          if (!target || typeof target.matches !== 'function') return;
+        // --- TRẠNG THÁI ỨNG DỤNG ---
+        let state = {
+            searchTerm: '',
+            filterCategory: 'Tất cả'
+        };
 
-          if (target.matches('.delete-boss-button')) {
-              const bossId = parseInt(target.dataset.bossId, 10);
-              bosses = bosses.filter(b => b.id !== bossId);
-              saveState();
-              render();
-          }
-
-          if (target.matches('.kill-button')) {
-              const bossId = parseInt(target.dataset.bossId, 10);
-              const channelId = parseInt(target.dataset.channelId, 10);
-              const now = Date.now();
-
-              bosses = bosses.map(boss => {
-                  if (boss.id === bossId) {
-                      const updatedChannels = boss.channels.map(channel =>
-                          channel.id === channelId ? { ...channel, killTimestamp: now } : channel
-                      );
-                      const sortedChannels = [...updatedChannels].sort(sortChannels);
-                      return { ...boss, channels: sortedChannels };
-                  }
-                  return boss;
-              });
-              
-              saveState();
-              render();
-          }
-      }
-
-      function handleLangChange(event) {
-        const newLang = event.target.dataset.lang;
-        if (newLang && newLang !== currentLanguage) {
-            currentLanguage = newLang;
-            saveLangState();
-            render();
+        // --- CÁC HÀM RENDER ---
+        function renderHeader() {
+            headerEl.innerHTML = `
+                <img 
+                    src="https://scontent.fhph5-1.fna.fbcdn.net/v/t39.30808-6/574597309_122099122845102557_7390863162137869022_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=XOPh2jZBUQ8Q7kNvwFv9Srb&_nc_oc=Adkl7VbTc7TMbvM-eb9VCfn17huul7UwrtN00r97KaRwZdT6pvhO-GKiBNImjzbpmz68L_aVyGKgc1EAIjxB8xaT&_nc_zt=23&_nc_ht=scontent.fhph5-1.fna&_nc_gid=ulNBrH-8LMt9mnMVCFK7lg&oh=00_AfjK4SR-ziiJWlE_89yMIkFoDjkhNYfshjxOmFARZPKBpQ&oe=69124C9C" 
+                    alt="${AUTHOR_NAME}"
+                    class="w-24 h-24 rounded-full mx-auto mb-4 border-4 border-white shadow-md"
+                />
+                <h1 class="text-4xl font-bold text-gray-900 tracking-tight sm:text-5xl">Các công cụ và dự án của ${AUTHOR_NAME}</h1>
+                <p class="mt-6 text-lg text-gray-600">${AUTHOR_BIO}</p>
+            `;
         }
-      }
+        
+        function renderFooter() {
+            const linksHtml = FOOTER_LINKS.map(link => 
+                `<a href="${link.url}" class="hover:text-gray-800 transition-colors">${link.name}</a>`
+            ).join('');
+            footerEl.innerHTML = `
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row justify-between items-center text-sm text-gray-500">
+                    <p>&copy; ${new Date().getFullYear()} ${AUTHOR_NAME} — Các công cụ cá nhân. Hỗ trợ hoặc donate <a href="#" class="hover:text-gray-800 transition-colors">tại đây</a></p>
+                    <div class="flex gap-4 mt-4 sm:mt-0">${linksHtml}</div>
+                </div>
+            `;
+        }
 
-      // --- INITIALIZATION ---
-      function initializeApp() {
-          const rootElement = document.getElementById('root');
-          if (!rootElement) {
-              console.error("Root element not found!");
-              return;
-          }
+        function renderFilterOptions() {
+            filterSelect.innerHTML = CATEGORIES.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        }
 
-          rootElement.innerHTML = `
-              <div class="app-container">
-                <div class="header-controls">
-                    <h1 id="app-title"></h1>
-                    <div class="lang-switcher">
-                        <button data-lang="vi">VI</button>
-                        <button data-lang="en">EN</button>
+        function renderSoftwareGrid() {
+            const filteredSoftware = SOFTWARE_DATA.filter(software => {
+                const matchesCategory = state.filterCategory === 'Tất cả' || software.category === state.filterCategory;
+                const searchTermLower = state.searchTerm.toLowerCase();
+                const matchesSearch = software.name.toLowerCase().includes(searchTermLower) ||
+                                      software.shortDescription.toLowerCase().includes(searchTermLower);
+                return matchesCategory && matchesSearch;
+            });
+
+            if (filteredSoftware.length === 0) {
+                softwareGrid.innerHTML = '';
+                noResults.classList.remove('hidden');
+                return;
+            }
+
+            noResults.classList.add('hidden');
+            softwareGrid.innerHTML = filteredSoftware.map(software => {
+                const cardLinks = software.links.filter(l => l.type !== 'details');
+                const linkText = { download: 'Tải về', github: 'GitHub', donate: 'Quyên góp' };
+                
+                return `
+                    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col">
+                      <img src="${software.thumbnailUrl}" alt="${software.name}" class="w-full h-48 object-cover" />
+                      <div class="p-6 flex flex-col flex-grow">
+                        <span class="text-sm font-medium text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full self-start mb-2">${software.category}</span>
+                        <h3 class="text-xl font-semibold text-gray-900 mb-2">${software.name}</h3>
+                        <p class="text-gray-600 flex-grow">${software.shortDescription}</p>
+                        <div class="mt-6 pt-4 border-t border-gray-200">
+                            <div class="flex flex-wrap gap-2 items-center">
+                                <button
+                                    data-software-id="${software.id}"
+                                    class="view-details-btn flex items-center text-sm font-semibold text-indigo-600 hover:text-indigo-800 transition-colors"
+                                >
+                                    ${ICONS.details}
+                                    Xem chi tiết
+                                </button>
+                                <div class="flex-grow"></div>
+                                ${cardLinks.map(link => `
+                                    <a href="${link.url}" target="_blank" rel="noopener noreferrer" class="text-gray-500 hover:text-gray-800 transition-colors" title="${linkText[link.type]}">
+                                      ${ICONS[link.type] || ''}
+                                      <span class="sr-only">${linkText[link.type]}</span>
+                                    </a>
+                                `).join('')}
+                            </div>
+                        </div>
+                      </div>
                     </div>
+                `;
+            }).join('');
+            
+            // Gắn lại trình nghe sự kiện cho các nút mới
+            document.querySelectorAll('.view-details-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const softwareId = parseInt(e.currentTarget.getAttribute('data-software-id'));
+                    const software = SOFTWARE_DATA.find(s => s.id === softwareId);
+                    if (software) openModal(software);
+                });
+            });
+        }
+        
+        // --- LOGIC CỬA SỔ MODAL ---
+        function openModal(software) {
+            const linkInfo = {
+                download: { text: 'Tải về', icon: ICONS.download.replace('h-4 w-4', 'h-5 w-5'), className: 'bg-blue-600 hover:bg-blue-700' },
+                github: { text: 'Xem trên GitHub', icon: ICONS.github.replace('h-4 w-4', 'h-5 w-5'), className: 'bg-gray-800 hover:bg-gray-900'},
+                donate: { text: 'Quyên góp / Mua', icon: ICONS.donate.replace('h-4 w-4', 'h-5 w-5'), className: 'bg-pink-600 hover:bg-pink-700' },
+            };
+
+            modalTitle.textContent = software.name;
+            modalBody.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    ${software.images.map((img, index) => `
+                        <img src="${img}" alt="Ảnh chụp màn hình ${software.name} ${index + 1}" class="rounded-lg border border-gray-200 w-full object-contain" />
+                    `).join('')}
+                    ${(software.videos || []).map((videoUrl, index) => `
+                        <video controls class="rounded-lg border border-gray-200 w-full">
+                            <source src="${videoUrl}" type="video/mp4" />
+                            Trình duyệt của bạn không hỗ trợ thẻ video.
+                        </video>
+                    `).join('')}
                 </div>
-                <div class="add-boss-form">
-                    <input 
-                      type="text"
-                      id="add-boss-input"
-                    />
-                    <button class="add-boss-button" id="add-boss-button"></button>
+                <p class="text-gray-700 leading-relaxed mb-6">${software.longDescription}</p>
+                <div class="flex flex-wrap gap-4">
+                    ${software.links.filter(l => l.type !== 'details').map(link => {
+                        const info = linkInfo[link.type];
+                        if (!info) return '';
+                        return `
+                            <a 
+                                href="${link.url}"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="flex items-center justify-center px-4 py-2 rounded-md text-white font-semibold transition-colors ${info.className}"
+                            >
+                                ${info.icon}
+                                ${info.text}
+                            </a>
+                        `;
+                    }).join('')}
                 </div>
-                <div class="boss-list"></div>
-              </div>
-          `;
+            `;
+            modal.classList.add('is-open');
+            document.body.style.overflow = 'hidden'; // Ngăn cuộn nền
+        }
 
-          loadState();
-          render();
+        function closeModal() {
+            modal.classList.remove('is-open');
+            document.body.style.overflow = '';
+        }
 
-          document.querySelector('.add-boss-button').addEventListener('click', handleAddBoss);
-          document.querySelector('.boss-list').addEventListener('click', handleContainerClick);
-          document.querySelector('.lang-switcher').addEventListener('click', handleLangChange);
-          
-          setInterval(updateElapsedTimes, 10000);
-      }
+        // --- TRÌNH NGHE SỰ KIỆN ---
+        searchInput.addEventListener('input', e => {
+            state.searchTerm = e.target.value;
+            renderSoftwareGrid();
+        });
 
-      document.addEventListener('DOMContentLoaded', initializeApp);
+        filterSelect.addEventListener('change', e => {
+            state.filterCategory = e.target.value;
+            renderSoftwareGrid();
+        });
+
+        modal.addEventListener('click', closeModal);
+        modalContent.addEventListener('click', e => e.stopPropagation());
+        modalCloseBtn.addEventListener('click', closeModal);
+        window.addEventListener('keydown', e => {
+            if (e.key === 'Escape' && modal.classList.contains('is-open')) {
+                closeModal();
+            }
+        });
+
+        // --- KHỞI TẠO ---
+        function init() {
+            renderHeader();
+            renderFooter();
+            renderFilterOptions();
+            renderSoftwareGrid();
+        }
+
+        init();
+
     </script>
-  <script type="module" src="/index.tsx"></script>
+<script type="module" src="/index.tsx"></script>
 </body>
 </html>
